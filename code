@@ -1,0 +1,104 @@
+import os
+from datetime import datetime
+from typing import List
+
+# Global variables
+customers = []
+file_name = "customer_details.txt"  # File name to save customer details
+
+
+class Customer:
+    def __init__(self, name: str, address: str, last_service_date: str, future_service_date: str):
+        self.name = name
+        self.address = address
+        self.last_service_date = last_service_date
+        self.future_service_date = future_service_date
+
+    def __str__(self):
+        return (f"Customer Name: {self.name}\n"
+                f"Customer Address: {self.address}\n"
+                f"Last Service Date: {self.last_service_date}\n"
+                f"Future Service Date: {self.future_service_date}\n")
+
+
+def save_customer_details_to_file(customer: Customer):
+    try:
+        with open(file_name, "a") as file:
+            file.write(str(customer))
+            file.write("\n")
+    except IOError as e:
+        print(f"Failed to save customer details to file. Error: {e}")
+
+
+def add_customer():
+    name = input("Enter Customer Name: ").strip()
+    address = input("Enter Customer Address: ").strip()
+
+    last_service_date = input("Enter Last Service Date (dd-MM-yyyy): ").strip()
+    future_service_date = input("Enter Future Service Date (dd-MM-yyyy): ").strip()
+
+    try:
+        # Validate date format
+        datetime.strptime(last_service_date, "%d-%m-%Y")
+        datetime.strptime(future_service_date, "%d-%m-%Y")
+    except ValueError:
+        print("Invalid date format. Please use dd-MM-yyyy.")
+        return
+
+    customer = Customer(name, address, last_service_date, future_service_date)
+    customers.append(customer)
+    save_customer_details_to_file(customer)
+    print("Customer Details Added Successfully!")
+
+
+def remove_customer():
+    name = input("Enter Customer Name: ").strip()
+    global customers
+
+    for customer in customers:
+        if customer.name.lower() == name.lower():
+            customers.remove(customer)
+            print("Customer Details Removed Successfully!")
+            return
+
+    print("Customer Details Not Found!")
+
+
+def print_customers():
+    name = input("Enter Customer Name: ").strip()
+
+    if os.path.exists(file_name):
+        with open(file_name, "r") as file:
+            lines = file.readlines()
+            for i in range(0, len(lines), 5):  # Each customer record has 5 lines including a blank line
+                if lines[i].strip() == f"Customer Name: {name}":
+                    print("".join(lines[i:i+4]))  # Print customer details (4 lines)
+                    return
+    print("Customer Details Not Found!")
+
+
+# Output Interaction
+while True:
+    print("AC Service Management System")
+    print("1. Add Customer Details")
+    print("2. Remove Customer Details")
+    print("3. Print Customer Details")
+    print("4. Exit")
+
+    try:
+        choice = int(input("Enter your choice: ").strip())
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+        continue
+
+    if choice == 1:
+        add_customer()
+    elif choice == 2:
+        remove_customer()
+    elif choice == 3:
+        print_customers()
+    elif choice == 4:
+        print("Exiting the program...")
+        break
+    else:
+        print("Invalid Choice!")
